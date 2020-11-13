@@ -7,3 +7,5 @@ export const CUSTOMER_ACCOUNT_BAD_CREDIT_STATE_RESET =
 export const ORDER_PLACED = 'OrderPlaced';
 export const ORDER_MARKED_INVALID = 'OrderMarkedInvalid';
 export const ORDER_MARKED_ASKBOSS = 'OrderMarkedAskBoss';
+export const ORDER_CONFIRMED = 'OrderConfirmed';
+export const ORDER_PAID = 'OrderPaid';

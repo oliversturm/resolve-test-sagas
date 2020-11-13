@@ -9,21 +9,20 @@ export default {
   handlers: {
     Init: async ({ store }) => {
       await store.defineTable('CustomerAccounts', {
-        indexes: { id: 'string', name: 'string' },
+        indexes: { id: 'string' },
         fields: ['state'],
       });
     },
 
     [CUSTOMER_ACCOUNT_CREATED]: async (
       { store, sideEffects },
-      { aggregateId, payload: { name } }
+      { aggregateId }
     ) => {
       console.log(
         `[order-confirmation] CUSTOMER_ACCOUNT_CREATED, enabled=${sideEffects.isEnabled}`
       );
       await store.insert('CustomerAccounts', {
         id: aggregateId,
-        name,
         state: 'ok',
       });
     },
@@ -54,16 +53,16 @@ export default {
 
     [ORDER_PLACED]: async (
       { store, sideEffects },
-      { aggregateId, payload: { customer, lines } }
+      { aggregateId, payload: { customerId, lines } }
     ) => {
       console.log('[order-confirmation] ORDER_PLACED');
-      // We should find a customer account with the given name
+      // We should find a customer account
       const customerAccount = await store.findOne('CustomerAccounts', {
-        name: customer,
+        id: customerId,
       });
       if (!customerAccount) {
         console.log(
-          `[order-confirmation] No customer account found for ${customer}`
+          `[order-confirmation] No customer account found for ${customerId}`
         );
         await sideEffects.executeCommand({
           aggregateName: 'order',
@@ -76,11 +75,11 @@ export default {
       // The customer account should be in state 'ok'
       if (customerAccount.state !== 'ok') {
         console.log(
-          `[order-confirmation] Customer account for ${customer} is not in "ok" state`
+          `[order-confirmation] Customer account ${customerId} is not in "ok" state`
         );
         await sideEffects.executeCommand({
           aggregateName: 'order',
-          type: 'markOrderInvalid',
+          type: 'markOrderAskBoss',
           aggregateId,
           payload: { reason: 'Customer account state is not "ok"' },
         });
@@ -106,11 +105,20 @@ export default {
         return;
       }
 
+      // Seems that all is good with the order, so we auto-confirm it.
+      // Alternatively this can be done by the boss after they have
+      // manually checked whatever they need to check.
       console.log(
-        `[order-confirmation] All good with order for customer ${customer}, details ${JSON.stringify(
+        `[order-confirmation] All good with order for customer ${customerId}, details ${JSON.stringify(
           customerAccount
         )}`
       );
+
+      await sideEffects.executeCommand({
+        aggregateName: 'order',
+        type: 'confirmOrder',
+        aggregateId,
+      });
     },
   },
 };

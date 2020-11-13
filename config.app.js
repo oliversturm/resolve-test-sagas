@@ -36,6 +36,12 @@ const appConfig = {
       connectorName: 'default',
       schedulerName: 'scheduler',
     },
+    {
+      name: 'customerAccountCreditCheck',
+      source: 'common/sagas/customerAccount-creditcheck.saga.js',
+      connectorName: 'default',
+      schedulerName: 'scheduler',
+    },
   ],
   clientEntries: ['client/index.js'],
 };

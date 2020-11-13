@@ -5,11 +5,7 @@ import {
 } from '../event-types';
 
 export default {
-  createCustomerAccount: (
-    customer,
-    { payload: { name } },
-    { aggregateVersion }
-  ) => {
+  createCustomerAccount: (customer, { payload: { name } }) => {
     if (customer.exists) throw new Error('Customer exists');
 
     if (!name) throw new Error('"name" is required');
@@ -17,13 +13,13 @@ export default {
     return { type: CUSTOMER_ACCOUNT_CREATED, payload: { name } };
   },
 
-  setCustomerAccountBadCreditState: (customer, _, { aggregateVersion }) => {
+  setCustomerAccountBadCreditState: (customer) => {
     if (!customer.exists) throw new Error('Customer does not exist');
 
     return { type: CUSTOMER_ACCOUNT_BAD_CREDIT_STATE_SET };
   },
 
-  resetCustomerAccountBadCreditState: (customer, _, { aggregateVersion }) => {
+  resetCustomerAccountBadCreditState: (customer) => {
     if (!customer.exists) throw new Error('Customer does not exist');
 
     return { type: CUSTOMER_ACCOUNT_BAD_CREDIT_STATE_RESET };
